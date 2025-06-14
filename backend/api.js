@@ -1,9 +1,26 @@
-// Import environment variables
-require('dotenv').config();
-
 // Import libs
 const axios = require('axios');
 const { chromium } = require('playwright');
+let browser = null;
+
+
+async function getBrowser() {
+    if (browser && browser.isConnected()) {
+        return browser;
+    }
+    browser = await chromium.launch({
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--single-process'
+        ],
+        headless: true,
+    });
+    return browser;
+}
+
+
 
 module.exports = {
 
@@ -172,16 +189,12 @@ module.exports = {
     },
 
     InputAttendCode: async function(username, password, code) {
-        const browser = await chromium.launch({
-            headless: true,
-        });
-
-        const url = await this.GetHomeUrl(username, password);
+        const browser = await getBrowser();
         const page = await browser.newPage();
-        await page.goto(url);
-
-
         try {
+            const url = await this.GetHomeUrl(username, password);
+            await page.goto(url);
+
             await page.evaluate(() => {
             // eslint-disable-next-line no-undef
                 $('#menuPanel').panel('open');
@@ -206,20 +219,20 @@ module.exports = {
             await page.locator('button:has-text("出席登録する")').click({
                 timeout: 1000,
             });
+            const screenshot = (await page.screenshot()).toString('base64');
+            return screenshot;
         }
         catch (e) {
             const screenshot = (await page.screenshot()).toString('base64');
             await browser.close();
             return screenshot;
         }
-
-        await page.waitForNavigation();
-        await page.mouse.click(1, 1);
-        // await page.waitForTimeout(500);
-        const screenshot = (await page.screenshot()).toString('base64');
-
-        await browser.close();
-        return screenshot;
+        finally {
+            await page.waitForNavigation();
+            await page.mouse.click(1, 1);
+            await page.close();
+            // await page.waitForTimeout(500);
+        }
     },
 
     GetLectureSyllabusUrl: async function(username, password, lecture) {
@@ -263,25 +276,26 @@ module.exports = {
     },
 
     GetUnreadNotificationCount: async function(username, password) {
-        const url = await this.GetHomeUrl(username, password);
-        const browser = await chromium.launch({
-            headless: true,
-        });
+        const browser = await getBrowser();
         const page = await browser.newPage();
-        await page.goto(url);
-
-        await page.waitForLoadState('networkidle');
         try {
+
+            const url = await this.GetHomeUrl(username, password);
+            await page.goto(url);
+            await page.waitForLoadState('networkidle');
+
             const count = await page.locator('span.noticeCount').first();
             const text = await count.innerText({
                 timeout: 1000,
             });
-            await browser.close();
             return text;
         }
         catch (error) {
             await browser.close();
             return '0';
+        }
+        finally {
+            await browser.close();
         }
     },
 };

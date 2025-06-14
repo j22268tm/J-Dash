@@ -76,9 +76,11 @@ app.post('/api/notification/unreadCount', async (req, res) => {
     res.send(data);
 });
 
-app.use(express.static('public'));
+// app.use(express.static('public'));
 
 
-app.listen(process.env.PORT || 3000, () => {
-    console.log('Server started');
-});
+// app.listen(process.env.PORT || 3000, () => {
+//     console.log('Server started');
+// });
+
+module.exports = app; // for aws lambda
