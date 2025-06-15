@@ -676,15 +676,16 @@
         /*****************
          * Network utils
          */
+        const baseUrl = "https://lu47mkewja.execute-api.ap-northeast-1.amazonaws.com/default/j-dash-function";
         const APIEndpoint = {
-            login: 'api/login',
-            schedule: 'api/schedule',
-            lectureStatus: 'api/lectureStatus',
-            homeUrl: 'api/homeUrl',
-            attendance: 'api/attendance',
-            lectureSyllabus: 'api/lectureSyllabus',
-            notificationUrl: 'api/notification/url',
-            unreadNotificationCount: 'api/notification/unreadCount',
+            login: `${baseUrl}/api/login`,
+            schedule: `${baseUrl}/api/schedule`,
+            lectureStatus: `${baseUrl}/api/lectureStatus`,
+            homeUrl: `${baseUrl}/api/homeUrl`,
+            attendance: `${baseUrl}/api/attendance`,
+            lectureSyllabus: `${baseUrl}/api/lectureSyllabus`,
+            notificationUrl: `${baseUrl}/api/notification/url`,
+            unreadNotificationCount: `${baseUrl}/api/notification/unreadCount`
         };
 
         function AJAX(url, method, data, success, error) {
